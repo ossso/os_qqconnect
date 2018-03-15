@@ -22,7 +22,10 @@ function os_qqconnect_Event_GetURL($type) {
             $third_url .= 'bind';
         break;
         case 'bind-account':
-            $third_url .= 'account';
+            $third_url .= 'bind_account';
+        break;
+        case 'create-account':
+            $third_url .= 'create_account';
         break;
     }
 

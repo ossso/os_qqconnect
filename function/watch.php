@@ -55,6 +55,10 @@ function os_qqconnect_WatchHandler($type) {
             return true;
         case 'bind':
             include ZBP_PATH . 'zb_users/plugin/os_qqconnect/page/bind.php';
+            /**
+             * 不可删除版权声明，否则视为不尊重版权，不再提供任何服务支持
+             */
+            echo "<!--本插件由橙色阳光提供，https://www.os369.com/-->\r\n";
             return true;
     }
     return false;
