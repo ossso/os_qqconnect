@@ -13,6 +13,8 @@ switch ($type) {
             "active",
             "appid",
             "appkey",
+            "user_auto_create",
+            "user_reg_level",
         );
 
         foreach ($save_param as $v) {

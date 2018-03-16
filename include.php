@@ -28,4 +28,38 @@ function InstallPlugin_os_qqconnect() {
     os_qqconnect_CreateTable();
 }
 
-function UninstallPlugin_os_qqconnect() {}
+function UninstallPlugin_os_qqconnect() {
+
+}
+
+/**
+ * 返回时间天数
+ */
+function os_qqconnect_AgoTime($ptime) {
+    $ptime = strtotime($ptime);
+    $etime = time() - $ptime;
+    if($etime < 10) return '刚刚';
+    $nowYear = date('Y');
+    $setYear = date('Y',$ptime);
+    if ($nowYear != $setYear) {
+        return date('Y/m/d H:i', $ptime);
+    }
+    $nowMonth = date('m');
+    $setMonth = date('m',$ptime);
+    if ($nowMonth != $setMonth) {
+        return date('m/d H:i', $ptime);
+    }
+    $interval = array (
+        24 * 60 * 60            =>  '天前',
+        60 * 60                 =>  '小时前',
+        60                      =>  '分钟前',
+        1                       =>  '秒前'
+    );
+    foreach ($interval as $secs => $str) {
+        $d = $etime / $secs;
+        if ($d >= 1) {
+            $r = round($d);
+            return $r . $str;
+        }
+    };
+}

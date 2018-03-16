@@ -27,6 +27,9 @@ function os_qqconnect_Event_GetURL($type) {
         case 'create-account':
             $third_url .= 'create_account';
         break;
+        case 'manage':
+            $third_url .= 'manage';
+        break;
     }
 
     return $third_url;
@@ -37,6 +40,10 @@ function os_qqconnect_Event_GetURL($type) {
  */
 function os_qqconnect_Event_ThirdBind($openid, $token) {
     global $zbp;
+
+    if ($zbp->Config('os_qqconnect')->active != "1") {
+        return false;
+    }
 
     $t = new OS_QQConnect;
     $t->Type = 0;
@@ -55,6 +62,11 @@ function os_qqconnect_Event_ThirdBind($openid, $token) {
  */
 function os_qqconnect_Event_GetThirdInfo($openid) {
     global $zbp;
+
+    if ($zbp->Config('os_qqconnect')->active != "1") {
+        return false;
+    }
+
     $t = new OS_QQConnect;
     $status = $t->LoadInfoByOpenID($openid, 0);
     if (!$status) {
@@ -76,6 +88,11 @@ function os_qqconnect_Event_GetThirdInfo($openid) {
  */
 function os_qqconnect_Event_ThirdSyncInfoByQQ($openid, $token) {
     global $zbp;
+
+    if ($zbp->Config('os_qqconnect')->active != "1") {
+        return false;
+    }
+
     $t = new OS_QQConnect;
     $status = $t->LoadInfoByOpenID($openid, 0);
     if (!$status) {
@@ -117,18 +134,23 @@ function os_qqconnect_Event_ThirdSyncInfoByQQ($openid, $token) {
  */
 function os_qqconnect_Event_ThirdLogin($openid, $token, $thirdClass = null) {
     global $zbp;
+
+    if ($zbp->Config('os_qqconnect')->active != "1") {
+        return false;
+    }
+
     $t = new OS_QQConnect;
     $status = $t->LoadInfoByOpenID($openid, 0);
     if (!$status) {
         echo 'Login Error 1, 登录异常';
-        die();
+        exit;
     }
 
     $m = new Member;
     $status = $m->LoadInfoByID($t->UID);
     if (!$status) {
         echo 'Login Error 2, 登录异常';
-        die();
+        exit;
     }
 
     // 将用户信息载入$zbp中
@@ -164,4 +186,155 @@ function os_qqconnect_Event_GetUserThird($uid = false) {
     $sql = $zbp->db->sql->Select($zbp->table['os_qqconnect'], '*', $w);
     $result = $zbp->GetListType('OS_QQConnect', $sql);
     return $result;
+}
+
+/**
+ * 第三方绑定登录
+ */
+function os_qqconnect_Event_ThirdBindLogin() {
+    global $zbp;
+    if ($zbp->Config('os_qqconnect')->active != "1") {
+        return false;
+    }
+    $json = $array();
+    $username = trim(GetVars("username", "POST"));
+    $password = trim(GetVars("password", "POST"));
+    if ($zbp->Verify_MD5(GetVars('username', 'POST'), GetVars('password', 'POST'), $m)) {
+        $zbp->user = $m;
+        $un = $m->Name;
+        $ps = $m->PassWord_MD5Path;
+        if ($zbp->user->Status != 0) {
+            $json['code'] = 200100;
+            $json['message'] = "已被限制登录";
+        } else {
+            setcookie("username", $un, 0, $zbp->cookiespath);
+        	setcookie("password", $ps, 0, $zbp->cookiespath);
+
+            $access_token = $_SESSION['qq_token']; // 用户识别
+    		$openid = $_SESSION['qq_openid']; // 用户ID
+            // 执行绑定
+            os_qqconnect_Event_ThirdBind($openid, $access_token);
+            $json['code'] = 100000;
+            $json['message'] = "绑定成功";
+        }
+    } else {
+        $json['code'] = 200000;
+        $json['message'] = "用户名或密码错误";
+    }
+
+    echo json_encode($json);
+    exit;
+}
+
+/**
+ * 绑定自动生成的账户
+ */
+function os_qqconnect_Event_ThirdBindCreate() {
+    global $zbp;
+    if ($zbp->Config('os_qqconnect')->user_auto_create != "1") {
+        return false;
+    }
+
+    $access_token = $_SESSION['qq_token']; // 用户识别
+    $openid = $_SESSION['qq_openid']; // 用户ID
+    // 生成唯一Name
+    $md5ID = md5($openid);
+    $md5ID = substr($md5ID, 8, 16);
+
+    $level = 6;
+    if ($zbp->Config('os_qqconnect')->user_reg_level) {
+        $level = $zbp->Config('os_qqconnect')->user_reg_level;
+    }
+
+    $mem = new Member;
+    $mem->Name = "third_qq_".$md5ID;
+    $mem->Level = $level;
+    $mem->IP = GetGuestIP();
+    $mem->Guid = GetGuid();
+    $mem->PostTime = time();
+    $mem->Password = Member::GetPassWordByGuid($access_token, $mem->Guid);
+    // 自动同步昵称
+    $mem->Metas->os_qqconnect_third_info = "1";
+    $mem->Save();
+
+    CountMember($mem, array(null, null, null, null));
+
+    $zbp->user = $mem;
+    $un = $mem->Name;
+    $ps = $mem->PassWord_MD5Path;
+    setcookie("username", $un, 0, $zbp->cookiespath);
+	setcookie("password", $ps, 0, $zbp->cookiespath);
+
+    // 执行绑定
+    os_qqconnect_Event_ThirdBind($openid, $access_token);
+}
+
+/**
+ * 显示绑定用户列表
+ */
+function os_qqconnect_Event_GetUserList() {
+    global $zbp;
+    $page = GetVars("page", "GET");
+    $page = (int)$page>0?(int)$page:1;
+    $pagebar = new Pagebar('{%host%}zb_users/plugin/os_qqconnect/user-list.php?page={%page%}', false);
+    $pagebar->PageCount = 20;
+    $pagebar->PageNow = $page;
+    $pagebar->PageBarCount = $zbp->pagebarcount;
+    $pagebar->UrlRule->Rules['{%page%}'] = $page;
+
+    $w = array();
+    $w = array("=", "third_Type", "0");
+
+    $limit = array(($pagebar->PageNow - 1) * $pagebar->PageCount, $pagebar->PageCount);
+    $option = array('pagebar' => $pagebar);
+
+    $sql = $zbp->db->sql->Select(
+        $zbp->table['os_qqconnect'],
+        array("*"),
+        $w,
+        null,
+        $limit,
+        $option
+    );
+    $result = $zbp->GetListType('OS_QQConnect', $sql);
+
+    return array(
+        "list"     => $result,
+        "pagebar"  => $pagebar,
+    );
+}
+
+/**
+ * 管理操作
+ */
+function os_qqconnect_Event_ManageUser() {
+    global $zbp;
+    $json = array();
+
+    if ($zbp->user->Level > 1) {
+        $json['code'] = 200200;
+        $json['message'] = "您的权限不足";
+        echo json_encode($json);
+        exit;
+    }
+
+    $id = GetVars('id', "POST");
+    $type = GetVars('type', "POST");
+    $t = new OS_QQConnect;
+    $t->LoadInfoByID($id);
+
+    if ($type == "unbind") {
+        $t->Del();
+        $json['code'] = 100000;
+        $json['message'] = "操作成功";
+    } elseif ($type == "lock") {
+        $t->User->Status = $t->User->Status==1?0:1;
+        $t->User->Save();
+        $json['code'] = 100000;
+        $json['message'] = "操作成功";
+        $json['result'] = $t->User->Status;
+    }
+
+    echo json_encode($json);
+    exit;
 }

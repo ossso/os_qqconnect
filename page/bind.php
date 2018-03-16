@@ -29,9 +29,13 @@
         </div>
         <button class="submit-btn">登录并绑定</button>
     </form>
+    <?php
+        if ($zbp->Config('os_qqconnect')->user_auto_create == "1") {
+    ?>
     <div class="login-account-create">
         还没有账户？点这儿<a href="<?php echo os_qqconnect_Event_GetURL('create-account') ?>" class="login-create">生成账户</a>
     </div>
+    <?php } ?>
 </div>
 <script src="<?php echo $zbp->host ?>zb_users/plugin/os_qqconnect/static/layer/layer.js" type="text/javascript"></script>
 <script>

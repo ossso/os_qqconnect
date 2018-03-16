@@ -60,6 +60,15 @@ function os_qqconnect_WatchHandler($type) {
              */
             echo "<!--本插件由橙色阳光提供，https://www.os369.com/-->\r\n";
             return true;
+        case 'bind-account':
+            os_qqconnect_Event_ThirdBindLogin();
+            return true;
+        case 'create-account':
+            os_qqconnect_Event_ThirdBindCreate();
+            return true;
+        case 'manage':
+            os_qqconnect_Event_ManageUser();
+            return true;
     }
     return false;
 }

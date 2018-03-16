@@ -8,6 +8,7 @@ class OS_QQConnect extends Base {
         parent::__construct($zbp->table['os_qqconnect'], $zbp->datainfo['os_qqconnect'], __CLASS__);
 
         $this->PostTime = time();
+        $this->UpdateTime = time();
     }
 
     /**
