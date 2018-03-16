@@ -196,7 +196,7 @@ function os_qqconnect_Event_ThirdBindLogin() {
     if ($zbp->Config('os_qqconnect')->active != "1") {
         return false;
     }
-    $json = $array();
+    $json = array();
     $username = trim(GetVars("username", "POST"));
     $password = trim(GetVars("password", "POST"));
     if ($zbp->Verify_MD5(GetVars('username', 'POST'), GetVars('password', 'POST'), $m)) {
@@ -209,13 +209,20 @@ function os_qqconnect_Event_ThirdBindLogin() {
         } else {
             setcookie("username", $un, 0, $zbp->cookiespath);
         	setcookie("password", $ps, 0, $zbp->cookiespath);
-
+            if (!session_id()) {
+                session_start();
+            }
             $access_token = $_SESSION['qq_token']; // 用户识别
     		$openid = $_SESSION['qq_openid']; // 用户ID
-            // 执行绑定
-            os_qqconnect_Event_ThirdBind($openid, $access_token);
-            $json['code'] = 100000;
-            $json['message'] = "绑定成功";
+            if (empty($openid) || empty($access_token)) {
+                $json['code'] = 200101;
+                $json['message'] = "绑定失败，授权信息遗失";
+            } else {
+                // 执行绑定
+                os_qqconnect_Event_ThirdBind($openid, $access_token);
+                $json['code'] = 100000;
+                $json['message'] = "绑定成功";
+            }
         }
     } else {
         $json['code'] = 200000;
@@ -231,12 +238,20 @@ function os_qqconnect_Event_ThirdBindLogin() {
  */
 function os_qqconnect_Event_ThirdBindCreate() {
     global $zbp;
+    if ($zbp->Config('os_qqconnect')->active != "1") {
+        return false;
+    }
     if ($zbp->Config('os_qqconnect')->user_auto_create != "1") {
         return false;
     }
-
+    if (!session_id()) {
+        session_start();
+    }
     $access_token = $_SESSION['qq_token']; // 用户识别
     $openid = $_SESSION['qq_openid']; // 用户ID
+    if (empty($openid) || empty($access_token)) {
+        return false;
+    }
     // 生成唯一Name
     $md5ID = md5($openid);
     $md5ID = substr($md5ID, 8, 16);
@@ -267,6 +282,13 @@ function os_qqconnect_Event_ThirdBindCreate() {
 
     // 执行绑定
     os_qqconnect_Event_ThirdBind($openid, $access_token);
+
+    // 方法执行完毕后 回到对应页面
+    $sourceUrl = GetVars('sourceUrl', 'COOKIE');
+    if (empty($sourceUrl)) {
+        $sourceUrl = $zbp->host;
+    }
+    Redirect($sourceUrl);
 }
 
 /**
@@ -337,4 +359,16 @@ function os_qqconnect_Event_ManageUser() {
 
     echo json_encode($json);
     exit;
+}
+
+
+/**
+ * 前台插入cookie来源
+ */
+function os_qqconnect_Event_FrontOutput() {
+    global $zbp;
+    if ($zbp->Config('os_qqconnect')->source_switch != "1") {
+        return null;
+    }
+    echo "\r\n".'!function() {$(document).on("click", ".os-qqconnect-link", function() { zbp.cookie.set("sourceUrl", window.location.href); })};'."\r\n";
 }

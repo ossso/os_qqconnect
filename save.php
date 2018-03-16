@@ -15,6 +15,7 @@ switch ($type) {
             "appkey",
             "user_auto_create",
             "user_reg_level",
+            "source_switch",
         );
 
         foreach ($save_param as $v) {

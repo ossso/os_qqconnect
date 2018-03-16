@@ -11,6 +11,8 @@ $GLOBALS['actions']['os_qqconnect'] = 6;
 function ActivePlugin_os_qqconnect() {
     Add_Filter_Plugin('Filter_Plugin_ViewAuto_Begin','os_qqconnect_Watch');
     Add_Filter_Plugin('Filter_Plugin_Cmd_Begin','os_qqconnect_WatchCmd');
+    Add_Filter_Plugin("Filter_Plugin_Mebmer_Avatar","os_qqconnect_WatchAvatar");
+    Add_Filter_Plugin('Filter_Plugin_Html_Js_Add', 'os_qqconnect_Event_FrontOutput');
 }
 
 function os_qqconnect_SubMenu($id){
@@ -28,15 +30,13 @@ function InstallPlugin_os_qqconnect() {
     os_qqconnect_CreateTable();
 }
 
-function UninstallPlugin_os_qqconnect() {
-
-}
+function UninstallPlugin_os_qqconnect() {}
 
 /**
  * 返回时间天数
  */
 function os_qqconnect_AgoTime($ptime) {
-    $ptime = strtotime($ptime);
+    // $ptime = strtotime($ptime);
     $etime = time() - $ptime;
     if($etime < 10) return '刚刚';
     $nowYear = date('Y');

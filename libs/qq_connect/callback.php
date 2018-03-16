@@ -21,6 +21,9 @@ if ($status) {
         // 执行绑定方法
         os_qqconnect_Event_ThirdBind($openid, $access_token);
     } else {
+        if (!session_id()) {
+            session_start();
+        }
         $_SESSION['qq_token'] = $access_token; // 用户识别
 		$_SESSION['qq_openid'] = $openid; // 用户ID
         Redirect(os_qqconnect_Event_GetURL('bind'));

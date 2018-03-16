@@ -54,16 +54,20 @@ function os_qqconnect_WatchHandler($type) {
             include ZBP_PATH . 'zb_users/plugin/os_qqconnect/libs/qq_connect/callback.php';
             return true;
         case 'bind':
-            include ZBP_PATH . 'zb_users/plugin/os_qqconnect/page/bind.php';
+            if ($zbp->Config('os_qqconnect')->active == '1') {
+                include ZBP_PATH . 'zb_users/plugin/os_qqconnect/page/bind.php';
+            } else {
+                return false;
+            }
             /**
              * 不可删除版权声明，否则视为不尊重版权，不再提供任何服务支持
              */
             echo "<!--本插件由橙色阳光提供，https://www.os369.com/-->\r\n";
             return true;
-        case 'bind-account':
+        case 'bind_account':
             os_qqconnect_Event_ThirdBindLogin();
             return true;
-        case 'create-account':
+        case 'create_account':
             os_qqconnect_Event_ThirdBindCreate();
             return true;
         case 'manage':
@@ -71,4 +75,17 @@ function os_qqconnect_WatchHandler($type) {
             return true;
     }
     return false;
+}
+
+/**
+ * 处理用户头像输出
+ */
+function os_qqconnect_WatchAvatar($member) {
+    global $zbp;
+    $s = $zbp->usersdir . 'avatar/' . $member->ID . '.png';
+    if (is_readable($s)) {
+        return $zbp->host . 'zb_users/avatar/' . $member->ID . '.png';
+    } else if ($member->Metas->os_qqconnect_avatar_qq) {
+        return $member->Metas->os_qqconnect_avatar_qq;
+    }
 }

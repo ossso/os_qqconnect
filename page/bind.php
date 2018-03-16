@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="<?php echo $zbp->host ?>zb_users/plugin/os_qqconnect/static/bind.css" type="text/css" />
 	<script src="<?php echo $zbp->host ?>zb_system/script/jquery-2.2.4.min.js" type="text/javascript"></script>
 	<script src="<?php echo $zbp->host ?>zb_system/script/zblogphp.js" type="text/javascript"></script>
+	<script src="<?php echo $zbp->host ?>zb_system/script/c_html_js_add.php" type="text/javascript"></script>
     <script src="<?php echo $zbp->host ?>zb_system/script/md5.js" type="text/javascript"></script>
     <title>QQ互联用户绑定 - <?php echo $zbp->name ?></title>
 </head>
@@ -47,7 +48,7 @@
         if (!username.length) {
             layer.msg("请输入用户名");
             return this;
-        } else if (!password.length < 8) {
+        } else if (password.length < 8) {
             layer.msg("请输入正确的密码");
             return this;
         }

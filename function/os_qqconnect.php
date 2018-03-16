@@ -75,7 +75,7 @@ class OS_QQConnect extends Base {
      */
     public function Save() {
         global $zbp;
-        $this->data['UpdateTime'] = time();
+        $this->UpdateTime = time();
         return parent::Save();
     }
 }
