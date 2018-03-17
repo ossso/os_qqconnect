@@ -165,7 +165,7 @@ require $blogpath . 'zb_system/admin/admin_top.php';
         <div class="readme">
             <h3>插件配置说明</h3>
             <ul>
-                <li>- 如果您没有appid和appkey，请前往<a href="https://connect.qq.com/" target="_blank">https://connect.qq.com/</a>申请</li>
+                <li>- 如果您没有appid和appkey，请前往<a href="https://connect.qq.com/" target="_blank">connect.qq.com</a>申请</li>
                 <li>- 您用于应用填写网站回调域的地址是<code class="copy" title="点击复制"><?php echo os_qqconnect_Event_GetURL('callback'); ?></code></li>
                 <li>- 关于应用接口，目前仅需默认的<code>get_user_info</code></li>
                 <li>- 登录访问地址<code class="copy" title="点击复制"><?php echo os_qqconnect_Event_GetURL('login'); ?></code></li>

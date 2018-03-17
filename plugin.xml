@@ -3,7 +3,7 @@
 <id>os_qqconnect</id>
 <name>QQ互联</name>
 <url>https://www.os369.com/app/item/os_qqconnect</url>
-<note>QQ互联，用QQ登录ZBlogPHP的插件</note>
+<note>QQ互联，ZBlogPHP的QQ登录插件</note>
 <description></description>
 <path>main.php</path>
 <include>include.php</include>
@@ -21,9 +21,9 @@
 <adapted>151740</adapted>
 <version>1.0</version>
 <pubdate>2018-03-15</pubdate>
-<modified>2018-03-15</modified>
+<modified>2018-03-18</modified>
 <price>0</price>
-<phpver>5.5</phpver>
+<phpver>5.3</phpver>
 <advanced>
   <dependency></dependency>
   <rewritefunctions></rewritefunctions>
