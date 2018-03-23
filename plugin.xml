@@ -4,7 +4,8 @@
 <name>QQ互联</name>
 <url>https://www.os369.com/app/item/os_qqconnect</url>
 <note>QQ互联，ZBlogPHP的QQ登录插件</note>
-<description></description>
+<description>v1.0 正式发布
+v1.1 180323 更新callback.php地址，解决问号地址问题</description>
 <path>main.php</path>
 <include>include.php</include>
 <level>1</level>
@@ -19,9 +20,9 @@
   <url></url>
 </source>
 <adapted>151740</adapted>
-<version>1.0</version>
+<version>1.1</version>
 <pubdate>2018-03-15</pubdate>
-<modified>2018-03-18</modified>
+<modified>2018-03-23</modified>
 <price>0</price>
 <phpver>5.3</phpver>
 <advanced>

@@ -9,6 +9,9 @@ function os_qqconnect_Event_GetURL($type) {
         $third_url = $zbp->host . 'os_qqconnect/';
     } else {
         $third_url = $zbp->host . 'zb_system/cmd.php?act=os_qqconnect&type=';
+        if ($type == "callback") {
+            return $zbp->host . 'zb_users/plugin/os_qqconnect/callback.php';
+        }
     }
 
     switch ($type) {
