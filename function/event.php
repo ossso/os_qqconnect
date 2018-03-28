@@ -225,7 +225,7 @@ function os_qqconnect_Event_ThirdBindLogin() {
             $json['code'] = 200100;
             $json['message'] = "已被限制登录";
         } else {
-            
+
             $sdt = 0;
             $addinfo = array();
             $addinfo['chkadmin'] = (int) $zbp->CheckRights('admin');
@@ -311,8 +311,23 @@ function os_qqconnect_Event_ThirdBindCreate() {
     $zbp->user = $mem;
     $un = $mem->Name;
     $ps = $mem->PassWord_MD5Path;
-    setcookie("username", $un, 0, $zbp->cookiespath);
-	setcookie("password", $ps, 0, $zbp->cookiespath);
+
+    $sdt = 0;
+    $addinfo = array();
+    $addinfo['chkadmin'] = (int) $zbp->CheckRights('admin');
+    $addinfo['chkarticle'] = (int) $zbp->CheckRights('ArticleEdt');
+    $addinfo['levelname'] = $mem->LevelName;
+    $addinfo['userid'] = $mem->ID;
+    $addinfo['useralias'] = $mem->StaticName;
+    if(HTTP_SCHEME == 'https://'){
+        setcookie("username", $un, $sdt, $zbp->cookiespath, '', true, false);
+        setcookie("password", $ps, $sdt, $zbp->cookiespath, '', true, true);
+        setcookie("addinfo" . str_replace('/', '', $zbp->cookiespath), json_encode($addinfo), $sdt, $zbp->cookiespath, '', true, false);
+    } else {
+        setcookie("username", $un, $sdt, $zbp->cookiespath);
+        setcookie("password", $ps, $sdt, $zbp->cookiespath);
+        setcookie("addinfo" . str_replace('/', '', $zbp->cookiespath), json_encode($addinfo), $sdt, $zbp->cookiespath);
+    }
 
     // 执行绑定
     os_qqconnect_Event_ThirdBind($openid, $access_token);
