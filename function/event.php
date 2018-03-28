@@ -160,8 +160,23 @@ function os_qqconnect_Event_ThirdLogin($openid, $token, $thirdClass = null) {
     $zbp->user = $m;
     $un = $m->Name;
     $ps = $m->PassWord_MD5Path;
-    setcookie("username", $un, 0, $zbp->cookiespath);
-	setcookie("password", $ps, 0, $zbp->cookiespath);
+
+    $sdt = 0;
+    $addinfo = array();
+    $addinfo['chkadmin'] = (int) $zbp->CheckRights('admin');
+    $addinfo['chkarticle'] = (int) $zbp->CheckRights('ArticleEdt');
+    $addinfo['levelname'] = $m->LevelName;
+    $addinfo['userid'] = $m->ID;
+    $addinfo['useralias'] = $m->StaticName;
+    if(HTTP_SCHEME == 'https://'){
+        setcookie("username", $un, $sdt, $zbp->cookiespath, '', true, false);
+        setcookie("password", $ps, $sdt, $zbp->cookiespath, '', true, true);
+        setcookie("addinfo" . str_replace('/', '', $zbp->cookiespath), json_encode($addinfo), $sdt, $zbp->cookiespath, '', true, false);
+    } else {
+        setcookie("username", $un, $sdt, $zbp->cookiespath);
+        setcookie("password", $ps, $sdt, $zbp->cookiespath);
+        setcookie("addinfo" . str_replace('/', '', $zbp->cookiespath), json_encode($addinfo), $sdt, $zbp->cookiespath);
+    }
 
     // 挂载上接口 会传入third
     if(isset($GLOBALS['hooks']['Filter_Plugin_VerifyLogin_Succeed'])){
@@ -210,8 +225,24 @@ function os_qqconnect_Event_ThirdBindLogin() {
             $json['code'] = 200100;
             $json['message'] = "已被限制登录";
         } else {
-            setcookie("username", $un, 0, $zbp->cookiespath);
-        	setcookie("password", $ps, 0, $zbp->cookiespath);
+            
+            $sdt = 0;
+            $addinfo = array();
+            $addinfo['chkadmin'] = (int) $zbp->CheckRights('admin');
+            $addinfo['chkarticle'] = (int) $zbp->CheckRights('ArticleEdt');
+            $addinfo['levelname'] = $m->LevelName;
+            $addinfo['userid'] = $m->ID;
+            $addinfo['useralias'] = $m->StaticName;
+            if(HTTP_SCHEME == 'https://'){
+                setcookie("username", $un, $sdt, $zbp->cookiespath, '', true, false);
+                setcookie("password", $ps, $sdt, $zbp->cookiespath, '', true, true);
+                setcookie("addinfo" . str_replace('/', '', $zbp->cookiespath), json_encode($addinfo), $sdt, $zbp->cookiespath, '', true, false);
+            } else {
+                setcookie("username", $un, $sdt, $zbp->cookiespath);
+                setcookie("password", $ps, $sdt, $zbp->cookiespath);
+                setcookie("addinfo" . str_replace('/', '', $zbp->cookiespath), json_encode($addinfo), $sdt, $zbp->cookiespath);
+            }
+
             if (!session_id()) {
                 session_start();
             }
@@ -256,7 +287,7 @@ function os_qqconnect_Event_ThirdBindCreate() {
         return false;
     }
     // 生成唯一Name
-    $md5ID = md5($openid);
+    $md5ID = md5($openid.time());
     $md5ID = substr($md5ID, 8, 16);
 
     $level = 6;
@@ -373,5 +404,5 @@ function os_qqconnect_Event_FrontOutput() {
     if ($zbp->Config('os_qqconnect')->source_switch != "1") {
         return null;
     }
-    echo "\r\n".'!function() {$(document).on("click", ".os-qqconnect-link", function() { zbp.cookie.set("sourceUrl", window.location.href); })};'."\r\n";
+    echo "\r\n".'!function() {$(document).on("click", ".os-qqconnect-link", function() { zbp.cookie.set("sourceUrl", window.location.href); })}();'."\r\n";
 }
