@@ -86,6 +86,8 @@ function os_qqconnect_WatchAvatar($member) {
     if (is_readable($s)) {
         return $zbp->host . 'zb_users/avatar/' . $member->ID . '.png';
     } else if ($member->Metas->os_qqconnect_avatar_qq) {
-        return $member->Metas->os_qqconnect_avatar_qq;
+        // 强制HTTPS输出头像
+        $avatar = str_replace("http://","https://",$member->Metas->os_qqconnect_avatar_qq);
+        return $avatar;
     }
 }
